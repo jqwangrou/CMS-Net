@@ -41,7 +41,7 @@ num_blocks = 2
 num_classes = 2
 k_init = 'he_uniform'
 show_model = True
-# save_dir = "H:/WJQ/new_neural network/补充数据/"
+
 save_dir = "./data/mtry7/"
 conf_dl = "-" + m_dl
 ft_num = 516#516
