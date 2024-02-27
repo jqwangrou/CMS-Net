@@ -37,32 +37,19 @@ sensitivity_list = []
 specificity_list = []
 y_allcv = np.array([],dtype=int)
 rocp_allcv = np.array([],dtype=float)
-data_dir = 'H:/WJQ/new_neural network/补充数据/ginseng/RE_mtry7/XGBoost/3'
+data_dir = './XGBoost/3'
 if not os.path.exists(data_dir):
     os.makedirs(data_dir)
-# 加载数据
-dataset = pd.read_csv(r'H:\WJQ\new_neural network\补充数据\ginseng\RE_mtry7\ginseng_QI.csv')
+
+dataset = pd.read_csv(r'.\sva_result_516_train.csv')
 
 exp = dataset.iloc[:, 2:].astype(float)
-# exp_log = np.log2(exp+1)
-# new_exp_log = exp_log.copy()
-# new_exp_log.fillna(0, inplace=True)
+
 scaler = StandardScaler()
 exp_normalized = scaler.fit_transform(exp.T).T
 exp_normalized_df = pd.DataFrame(exp_normalized, columns=dataset.columns[2:])
 
-# data1 = exp_normalized_df.iloc[:60, :].values
-# label1 = dataset.iloc[:60, 1].values
-#
-# data2 = exp_normalized_df.iloc[60:, :].values
-# label2 = dataset.iloc[60:, 1].values
-# train_data = data1
-# train_label = label1
-# test_data = data2
-# test_label = label2
-
-# 划分训练集测试集
-train_data = exp_normalized_df.iloc[:, :].values#exp_normalized_df,QMDiab1-已经进行过标准化的数据，不需要再进行一次
+train_data = exp_normalized_df.iloc[:, :].values
 train_label = dataset.iloc[:, 1].values
 
 
@@ -77,7 +64,7 @@ def make_data_splits(train_data, train_label, data_cv_splits, cv_seed):
 
         splits_cv.append([x_train, y_train, x_test, y_test])
     return splits_cv
-# 数据增强：特征丢弃
+# Data enhancement: Feature discard
 def feature_dropout(data, drop_prob=0.2):
     mask = np.random.rand(*data.shape) > drop_prob
     return data * mask
@@ -96,7 +83,7 @@ for split_cv in splits_cv:
     mask = np.random.rand(*x_train.shape) > drop_prob
     dropout_ratio = np.sum(mask) / np.size(mask)
     retained_ratio = 1 - dropout_ratio
-    print("丢弃的特征比例：", retained_ratio)
+    print("Discard the feature ratio：", retained_ratio)
 
     # ros = RandomOverSampler(random_state=random_seed)
     # x_train_resampled, y_train_resampled = ros.fit_resample(x_train, y_train)
@@ -136,9 +123,6 @@ for split_cv in splits_cv:
         predictions = model.predict(x_val)
         print("val_ACC：{:.4f}".format(model.score(x_val, y_val)))
 
-        # label_classed_pred = model.predict_proba(x_test)
-        # label_classed_pred_d = np.argmax(label_classed_pred, axis=1)
-        # label_classed_pred_m = label_classed_pred
         label_classed_pred = model.predict(x_test)
         label_classed_pred_prob = model.predict_proba(x_test)[:, watch_cls]
         cm = confusion_matrix(y_test, label_classed_pred)
@@ -170,10 +154,6 @@ for split_cv in splits_cv:
         print(best_parameters)
         predictions = model.predict(x_val)
         print("val_ACC：{:.4f}".format(model.score(x_val, y_val)))
-
-        # label_classed_pred = model.predict_proba(x_test)
-        # label_classed_pred_d = np.argmax(label_classed_pred, axis=1)
-        # label_classed_pred_m = label_classed_pred
         label_classed_pred = model.predict(x_test)
         label_classed_pred_prob = model.predict_proba(x_test)[:, watch_cls]
         cm = confusion_matrix(y_test, label_classed_pred)
@@ -189,9 +169,9 @@ for split_cv in splits_cv:
         specificity = TN / (TN + FP)
     if model_name == "KNN":
         param_grid = {
-            'n_neighbors': [3, 5, 7, 9, 11],  # 邻居数
+            'n_neighbors': [3, 5, 7, 9, 11],  
             'weights': ['uniform', 'distance'],
-            'leaf_size': [10, 30, 50, 70]  # 权重函数,'distance'
+            'leaf_size': [10, 30, 50, 70] 
         }
         model = KNeighborsClassifier()
         grid_search = GridSearchCV(model, param_grid, cv=5, scoring='accuracy', verbose=1, n_jobs=-1)
@@ -207,9 +187,6 @@ for split_cv in splits_cv:
         predictions = model.predict(x_val)
         print("val_ACC：{:.4f}".format(model.score(x_val, y_val)))
 
-        # label_classed_pred = model.predict_proba(x_test)
-        # label_classed_pred_d = np.argmax(label_classed_pred, axis=1)
-        # label_classed_pred_m = label_classed_pred
         label_classed_pred = model.predict(x_test)
         label_classed_pred_prob = model.predict_proba(x_test)[:, watch_cls]
         cm = confusion_matrix(y_test, label_classed_pred)
@@ -225,9 +202,6 @@ for split_cv in splits_cv:
         specificity = TN / (TN + FP)
     if model_name == "RF":
         param_grid = {
-            # 'n_estimators': range(10, 200, 20),
-            # 'max_features': np.linspace(0.1, 0.9, num=9).tolist(),
-            # 'max_depth': range(1, 100, 10),
             'max_depth': [1,5,10,20, 50, 80, 100, None],
             'n_estimators':[10,20,50,100,120,150,200,300],
             'max_features': [0.1,0.3,0.6,0.8,0.9],
@@ -246,10 +220,7 @@ for split_cv in splits_cv:
         print(best_parameters)
         predictions = model.predict(x_val)
         print("val_ACC：{:.4f}".format(model.score(x_val, y_val)))
-
-        # label_classed_pred = model.predict_proba(x_test)
-        # label_classed_pred_d = np.argmax(label_classed_pred, axis=1)
-        # label_classed_pred_m = label_classed_pred
+        
         label_classed_pred = model.predict(x_test)
         label_classed_pred_prob = model.predict_proba(x_test)[:, watch_cls]
         cm = confusion_matrix(y_test, label_classed_pred)
@@ -307,9 +278,9 @@ for split_cv in splits_cv:
         specificity = TN / (TN + FP)
     hist_acc.append(accuracy_score(y_test, label_classed_pred))
     hist_rocp.append(roc_auc_score(y_test_watch, label_classed_pred_prob))
-    y_allcv = np.concatenate([y_allcv, y_test_watch])  # 合并整个CV下的真实标签
-    rocp_allcv = np.concatenate([rocp_allcv, label_classed_pred_prob])  # 合并整个CV下的预测标签
-    # print(hist_rocp,hist_acc)#长度都是五
+    y_allcv = np.concatenate([y_allcv, y_test_watch])  
+    rocp_allcv = np.concatenate([rocp_allcv, label_classed_pred_prob]) 
+    # print(hist_rocp,hist_acc)
     # print(y_allcv.shape,rocp_allcv.shape)
     fpr, tpr, _ = roc_curve(y_test, label_classed_pred_prob)
     all_fpr.append(fpr)
@@ -330,7 +301,7 @@ df_hist = pd.DataFrame({'Specificity': specificity_list,
                         'Sensitivity': sensitivity_list,
                         'acc': hist_acc,
                         'rocp': hist_rocp})
-print(df_hist.describe())  # 输出的是评价指标
+print(df_hist.describe()) 
 df_hist.to_csv(data_dir + "/results.csv",index=False)
 
 fpr_oc, tpr_oc, _ = roc_curve(y_allcv, rocp_allcv, pos_label=1)
@@ -347,10 +318,9 @@ plt.xlabel('False positive rate(1-Specificity)',fontsize=font_size)
 plt.ylabel('True positive rate(Sensitivity)',fontsize=font_size)
 plt.title('ROC curve',fontsize=font_size)
 plt.legend(loc='lower right',fontsize=font_size)
-# plt.savefig(roc_auc_dir + "/roc-cvs.png")
 plt.savefig(data_dir + "/roc-cvs.png")
 plt.show()
-    # 绘制每个折的ROC曲线
+    
 plt.figure(1111, figsize=(8, 8))
 for fold in range(total_cv):
     plt.plot(all_fpr[fold], all_tpr[fold],
