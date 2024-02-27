@@ -1,0 +1,12 @@
+tf-gpu2.4.0
+python3.8
+keras2.4.3
+h5py2.10.0
+numpy1.19.5
+scikit-learn1.3.2
+seaborn0.9.0
+gast0.3.3
+graphviz0.19.1
+pydot1.4.2
+pydot-ng2.0.0
+pydotplus2.0.2
