@@ -69,7 +69,7 @@ def feature_dropout(data, drop_prob=0.2):
     mask = np.random.rand(*data.shape) > drop_prob
     return data * mask
 
-x_train_val, x_test, y_train_val, y_test = train_test_split(train_data, train_label, test_size=0.3, stratify=train_label, random_state=random_state)#
+x_train_val, x_test, y_train_val, y_test = train_test_split(train_data, train_label, test_size=0.3, random_state=random_state)#
 splits_cv = make_data_splits(x_train_val, y_train_val, data_cv_splits, cv_seed)
 n_cv = 0
 for split_cv in splits_cv:
