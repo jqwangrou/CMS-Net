@@ -24,7 +24,7 @@ from keras.layers.wrappers import Bidirectional
 from tensorflow.python.keras.layers import MultiHeadAttention,LayerNormalization
 # import tensorflow_addons as tfa
 # from tensorflow_addons.activations import gelu
-
+from resnet import ResNet50
 
 random_state_tf=2100
 
@@ -220,7 +220,15 @@ def create_dlmodel(m_name=None):
                            kernel_initializer=k_init,
                            activation="softmax")(x)
         model = Model(inputs=x_in, outputs=prediction)
+    if m_name == "resnet50":
 
+        x_in = Input(shape=(ft_num, 1))
+
+        x = ResNet50(weights=None, include_top=False)(x_in)
+        x = GlobalAveragePooling1D()(x)
+        x = Dense(1024, activation='relu',kernel_regularizer=tf.keras.regularizers.l2(0.1))(x)
+        predictions = Dense(num_classes, activation='softmax')(x)
+        model = Model(inputs=x_in,outputs=predictions)
 
 
     global model_showed
